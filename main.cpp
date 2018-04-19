@@ -21,15 +21,13 @@ enum MEASURE {
 struct PointC {
     type x;
     type y;
-    int id;
-    int cluster;
+    int c;//cluster
 };
 static vector<PointC> points;
+static Mat image;
 
 void generateRandom(vector<PointC> &points, type minX, type maxX, int num);
-
 void generateRandom(vector<PointC> &points, type minX, type maxX, int num, type minY, type maxY);
-
 vector<vector<PointC> > cluster(vector<PointC>, int k, MEASURE measure = Euclidean);
 
 /****************************
@@ -44,36 +42,14 @@ vector<vector<PointC> > cluster(vector<PointC>, int k, MEASURE measure = Euclide
  ****************************/
 int main() {
     try {
-
-
-        Mat image = Mat::zeros(400, 400, CV_8UC3);
-
-        /*
-         * C++: void circle(InputOutputArray img, Point center, int radius, const Scalar& color, int thickness=1, int lineType=LINE_8, int shift=0 )
-
-             Parameters:
-             img – Image where the circle is drawn.
-             center – Center of the circle.
-             radius – Radius of the circle.
-             color – Circle color.
-             thickness – Thickness of the circle outline, if positive. Negative thickness means that a filled circle is to be drawn.
-             lineType – Type of the circle boundary. See the line() description.
-             shift – Number of fractional bits in the coordinates of the center and in the radius value.
-         */
-        circle(image, Point(32,32), 32, Scalar(0, 0, 255), -1, 8, 0);
-        //opencv coordinates are not mathematical coordinates, we need to flip the image
-        Mat flipped;
-        flip(image,flipped,0);
-        imshow("flipped 0", flipped);
-        waitKey(0);
-
+        image = Mat::zeros(420, 420, CV_8UC3);
         srand(time(nullptr));
         //vector<Point> points;
         generateRandom(points, 1, 100, 100);
 
-        int clusterCounts[] = {2, 3};
+
         cluster(points, 2);
-        cluster(points, 4);
+        //cluster(points, 4);
 
         // todo: intra-cluster distance of each cluster
         // todo: sum of intra-cluster distance of each cluster
@@ -86,6 +62,40 @@ int main() {
         return 1;
     }
 
+}
+
+void plot(){
+
+    circle(image, Point(32,32), 32, Scalar(0, 0, 255), -1);
+    //opencv coordinates are not mathematical coordinates, we need to flip the image
+    Mat flipped;
+    flip(image,flipped,0);
+    imshow("flipped 0", flipped);
+    waitKey(0);
+}
+
+
+
+void plot(vector<PointC> points){
+    int padding = 20, size = 400, windowSize = size+padding;
+    int scale = 4;
+    int p2 = padding/2;
+
+    //opencv coordinates are not mathematical coordinates, we need to flip the image
+    for (auto p:points){
+        if (p.c < 0)//centroids
+            circle(image, Point((p.x*4)+p2,(p.y*4)+p2), 3, Scalar(0, 0, 255), -1);
+        else
+            circle(image, Point((p.x*4)+p2,(p.y*4)+p2), 3, Scalar(255, 255, 255), -1);
+    }
+
+}
+
+void show(){
+    Mat flipped;
+    flip(image,flipped,0);
+    imshow("flipped 0", flipped);
+    waitKey(5000);
 }
 
 
@@ -178,7 +188,8 @@ void initialCenters(vector<PointC> &centroids, int k) {
     }
 
     cout << "Initial centroids:" << endl;
-    for (auto p: centroids) {
+    for (auto &p: centroids) {
+        p.c = -1;
         cout << p.x << "," << p.y << endl;
     }
 }
@@ -200,9 +211,10 @@ vector<vector<PointC> > cluster(vector<PointC> points, int k, MEASURE measure) {
     vector<vector<PointC> > clusters;
     vector<PointC> centroids;
 
-    //todo: now it is random, do it smartly
-
     initialCenters(centroids, k);
+    plot(points);
+    plot(centroids);
+    show();
     return clusters;
     do {
         updateLabels(points, centroids);
