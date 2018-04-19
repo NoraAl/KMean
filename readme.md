@@ -1,13 +1,13 @@
-# Naive Bayesian Classifier
-Simple implementation for Naive Bayesian programming assignment. 
+# K-Mean Clustering
+Simple implementation for K-mean clustering in c++.
 <br>
 Language: C++
 
-## Build & Run
-Within the project root directory:
+## Build and Run
+Within the project's root directory:
 ```
 cd build
 cmake ..
 make 
-./Bayesian
+./cluster
 ```
