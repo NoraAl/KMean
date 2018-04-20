@@ -1,10 +1,8 @@
 #include "cluster.hpp"
 
-static vector<PointC> points;
-static vector<PointC> centroids;
+static Points points;
+static Points centroids;
 static int minP, maxP;
-
-
 
 /****************************
  *
@@ -23,11 +21,11 @@ int main() {
         srand(time(nullptr));
 
         //auto ps = generateRandom(points, minP, maxP, count);
-        vector<PointC> ps = {{1,1,0},{1,2,0},{1,3,0},{1,4,0},
-                             {2,1,0},{2,2,0},{2,3,0},{2,4,0}};
+        Points ps = {{1,1},{1.5,1.5},{1,2},{1,3},{1,4},
+                     {2,1},{4,4},{2,2},{2,3},{2,4}};
 
 
-        vector<PointC> c = {{1,1,-1},{1,2,-1}};
+        Points c = {{1,1,-1},{1,2,-1}, {4,4,-1}};
 
         cout <<"Points:"<<endl;
         printPoints(ps);
@@ -36,7 +34,7 @@ int main() {
         //cluster for each k
         for (auto k: ks){
             cout <<"\n-------------------------------------------\nk = "<<k<<endl;
-            vector <PointC> currentCentroids = c;//initialCenters(k);
+            Points currentCentroids = c;//initialCenters(k);
             printPoints(currentCentroids);
             centroids = currentCentroids;
             points = ps;
@@ -54,20 +52,21 @@ int main() {
 }
 
 
-
 /****************************
  *
+ *
  * generate random points
+ *
  *
  ****************************/
 inline int getRandom(int min, int max) {
     return (rand() % (max - min + 1)) + min;
 }
 
-vector <PointC> generateRandom(vector<PointC> &points, type minX, type maxX, int num, bool centroids, type minY, type maxY) {
-    PointC point = PointC();
+Points generateRandom(Points &points, double minX, double maxX, int num, bool centroids, double minY, double maxY) {
+    P point = P();
     if (centroids)
-        point = PointC(-1);
+        point = P(-1);
     while (num) {
         point.x = getRandom(minX, maxX);
         point.y = getRandom(minY, maxY);
@@ -79,19 +78,21 @@ vector <PointC> generateRandom(vector<PointC> &points, type minX, type maxX, int
     return points;
 }
 
-vector <PointC> generateRandom(vector<PointC> &points, type minX, type maxX, int num, bool centroids) {
+Points generateRandom(Points &points, double minX, double maxX, int num, bool centroids) {
     return generateRandom(points, minX, maxX, num, centroids, minX, maxX);
 }
 
 /****************************
  *
+ *
  * initiate centroids
+ *
  *
  ****************************/
 
-vector<PointC> initialCenters(int k) {
+Points initialCenters(int k) {
     generateRandom(centroids, minP, maxP, k, true);
-    vector <PointC> p = centroids;
+    Points p = centroids;
     // make sure that initial centroids are unique
     auto fun = [&](int index) {
         int ii = centroids.size();
@@ -119,16 +120,19 @@ vector<PointC> initialCenters(int k) {
 
 /****************************
  *
- * reset each centroid to the average of its cluster
+ *
+ * reset each centroid to the
+ * average of its cluster
+ *
  *
  ****************************/
 inline bool updateCentroids() {
-    vector<PointC> oldCentroids = centroids;
+    Points oldCentroids = centroids;
 
 
     for (int i = 0; i< centroids.size(); i++) {
         int count = 0;
-        PointC currentCentroid = PointC(-1);
+        P currentCentroid = P(-1);
 
         for (auto p: points) {
             if (p.cluster == i) {
@@ -162,7 +166,10 @@ inline bool updateCentroids() {
 
 /****************************
  *
- * reassign each point to the nearest cluster
+ *
+ * reassign each point to the
+ * nearest cluster
+ *
  *
  ****************************/
 inline void updateLabels(MEASURE m) {
@@ -171,10 +178,7 @@ inline void updateLabels(MEASURE m) {
         double min = DBL_MAX;
         int i = 0;
         for (auto c: centroids) {
-            if (m == Euclidean)
-                 current = sqrt(pow(p.x - c.x, 2) + pow(p.y - c.y, 2));
-            else//Manhattan
-                 current = abs(p.x - c.x) + abs(p.y - c.y);
+            current = getDistance(p,c, m);
             if (current < min) {
                 min = current;
                 p.cluster = i;//initially all clusters are zero
@@ -184,53 +188,12 @@ inline void updateLabels(MEASURE m) {
     }
 }
 
-/****************************
- *
- * intra-cluster distance and the average
- * of all intra-cluster distances.
- *
- ****************************/
-
-void intracluster(MEASURE m, int k) {
-    vector<type> distances;
-
-    for (int i = 0; i< centroids.size(); i++) {
-        int count = 0;
-        double distance = 0;
-
-        for (auto p: points) {
-            if (p.cluster == i) {
-                count++;
-                if (m == Euclidean)
-                    distance += sqrt(pow(p.x - centroids[i].x, 2) + pow(p.y - centroids[i].y, 2));
-                else//Manhatten
-                    distance += abs(p.x - centroids[i].x) + abs(p.y - centroids[i].y);
-            }
-        }
-
-        if (count==0){ //empty cluster, regenerate it
-            distances.push_back( -1);//
-        } else{
-            distances.push_back( distance/count);
-        }
-
-    }
-
-    string measure = m? "Manhattan":"Euclidean";
-    cout <<endl<<"Intra-distance ("<<measure<<"):"<<endl;
-    type sum = 0;
-    for(auto d: distances){
-        sum +=d;
-        cout <<BGREEN<<d<<RESET<<"\t";
-    }
-    sum = sum/k;
-    cout <<"\t, and sum of intra-distance is: "<<BRED<<sum<<RESET<<endl;
-
-}
 
 /****************************
+ *
  *
  * k-mean algorithm
+ *
  *
  ****************************/
 void cluster(int k, MEASURE measure) {
@@ -252,5 +215,51 @@ void cluster(int k, MEASURE measure) {
     plot(points, centroids, measure, i );
 
     intracluster(measure,k);
+    minMax(points,centroids,measure);
+}
+
+
+/****************************
+ *
+ *
+ * intra-cluster distance and the
+ * average of all intra-cluster distances.
+ *
+ *
+ ****************************/
+
+void intracluster(MEASURE m, int k) {
+    vector<double> distances;
+
+    for (int i = 0; i< centroids.size(); i++) {
+        int count = 0; double distance = 0;// reset them each iteration
+
+        for (auto p: points) {
+            if (p.cluster == i) {
+                count++;
+                distance += getDistance(p,centroids[i], m);
+            }
+        }
+
+        if (count==0){ //empty cluster, regenerate it
+            distances.push_back(-1);//
+        } else{
+            distances.push_back( distance/count);
+        }
+
+    }
+
+
+    cout <<endl<<"Intra-distances ("<<(m? "Manhattan":"Euclidean")<<"):"<<endl;
+    double sum = 0;
+    for(auto d: distances){
+        if (d<0)
+            continue;
+        sum +=d;
+        cout <<BGREEN<<d<<RESET<<"\t";
+    }
+    sum = sum/k;
+    cout <<"\nAverage of intra-distances is: "<<BRED<<sum<<RESET<<endl;
+
 }
 

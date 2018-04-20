@@ -1,12 +1,6 @@
 #ifndef CLUSTER_HPP
 #define CLUSTER_HPP
 
-
-#define RESET   "\033[0m"
-#define BRED     "\033[1m\033[31m"      /* Bold Red */
-#define BGREEN   "\033[1m\033[32m"      /* Bold Green */
-#define BCYAN    "\033[1m\033[36m"      /* Bold Cyan */
-
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -14,45 +8,65 @@
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 
+
+#define RESET   "\033[0m"
+#define BRED     "\033[1m\033[31m"      /* Bold Red */
+#define BGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+
+
 using namespace std;
 using namespace cv;
 
-typedef double type;
 enum MEASURE {
     Euclidean, Manhattan
 };
 
-struct PointC {
-    PointC() : x(0), y(0), cluster(0) {}
+// Point structure, "Point" is reserved for one of cv types
+struct P {
+    P() : x(0), y(0), cluster(0) {}
 
-    PointC(int cluster) : x(0), y(0), cluster(cluster) {}
-    PointC(type x, type y, int cluster) : x(x), y(y), cluster(cluster) {}
+    P(int cluster) : x(0), y(0), cluster(cluster) {}
+    P(double x, double y) : x(x), y(y), cluster(0) {}//regular point
+    P(double x, double y, int cluster) : x(x), y(y), cluster(cluster) {}//potential cluster
 
     double x;
     double y;
     int cluster;
 };
+typedef vector<P> Points;
 
 // overload equal to check point equality
-bool operator==(const PointC &p1, const PointC &p2);
+bool operator==(const P &p1, const P &p2);
 
-bool operator!=(const PointC &p1, const PointC &p2);
+bool operator!=(const P &p1, const P &p2);
 
-vector<PointC>  generateRandom(vector<PointC> &points, type minX, type maxX, int num, bool centroids = false);
+Points  generateRandom(Points &points, double minX, double maxX, int num, bool centroids = false);
 
-vector<PointC>  generateRandom(vector<PointC> &points, type minX, type maxX, int num, bool centroids, type minY, type maxY);
+Points  generateRandom(Points &points, double minX, double maxX, int num, bool centroids, double minY, double maxY);
 
-vector<PointC> initialCenters(int k);
+Points initialCenters(int k);
 
 void cluster(int k, MEASURE measure = Euclidean);
 
-void plot(vector<PointC> points, Mat image);
+void plot(Points points, Mat image);
 
 void show(Mat image, MEASURE m, int i);
 
-void plot(vector<PointC>& points, vector<PointC>& centroids, MEASURE measure, int i);
+void plot(Points& points, Points& centroids, MEASURE measure, int i);
 
-void printPoints(vector<PointC> points) ;
+void printPoints(Points points) ;
 
+double getDistance(P p1, P p2, MEASURE m);
+
+inline double getEuclidean(P p1, P p2);//Euclidean
+
+inline double getManhattan(P p1, P p2);//Manhattan
+
+void intracluster(MEASURE m, int k);
+
+void minMax(Points &points, Points &centroids, MEASURE m);
+
+string fnum(double num);
 
 #endif
