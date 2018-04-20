@@ -6,6 +6,6 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(cluster main.cpp)
+add_executable(cluster main.cpp helpers.cpp)
 
 target_link_libraries( cluster ${OpenCV_LIBS})
