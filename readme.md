@@ -1,5 +1,5 @@
 # K-Mean Clustering
-Simple implementation for K-mean clustering in c++.
+Simple implementation for K-mean clustering in cluster++.
 <br>
 Language: C++
 
