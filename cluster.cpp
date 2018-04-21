@@ -15,20 +15,23 @@ int main() {
     try {
 
         srand(time(nullptr));
-        //auto ps = generateRandom(points, minP, maxP, 1000);
-        auto ps = readPoints("../points.txt", false);
-        
-        vector<int> ks={2};
+
+        vector <int> pCount = {20,1000};
+        vector <int> kCount = {2,3,4,7};
+
+
         //cluster for each k
-        for (auto k: ks){
-            cout <<"\n-------------------------------------------\nk = "<<k<<endl;
-            Points currentCentroids = c;//initialCenters(k);
-            printPoints(currentCentroids);
-            centroids = currentCentroids;
-            points = ps;
+        for (auto k: kCount){
+            string pointfile = format("../points_%d.txt",pCount[0]);
+            string centroidfile = format("../k_%d.txt", k);
+
+            cout <<"\n\nk = "<<k<<endl;
+
+            centroids = readPoints(centroidfile,true);
+            points = readPoints(pointfile,false);
             cluster(k, Euclidean);
-            centroids = currentCentroids;
-            points = ps;
+            centroids = readPoints(centroidfile,true);
+            points = readPoints(pointfile,false);
             cluster(k,Manhattan);
         }
         return 0;
@@ -37,73 +40,6 @@ int main() {
         return 1;
     }
 
-}
-
-
-/****************************
- *
- *
- * generate random points
- *
- *
- ****************************/
-inline int getRandom(int min, int max) {
-    return (rand() % (max - min + 1)) + min;
-}
-
-Points generateRandom(Points &points, double minX, double maxX, int num, bool centroids, double minY, double maxY) {
-    P point = P();
-    if (centroids)
-        point = P(-1);
-    while (num) {
-        point.x = getRandom(minX, maxX);
-        point.y = getRandom(minY, maxY);
-
-        points.push_back(point);
-        num--;
-    }
-
-    return points;
-}
-
-Points generateRandom(Points &points, double minX, double maxX, int num, bool centroids) {
-    return generateRandom(points, minX, maxX, num, centroids, minX, maxX);
-}
-
-/****************************
- *
- *
- * initiate centroids
- *
- *
- ****************************/
-
-Points initialCenters(int k) {
-    generateRandom(centroids, minP, maxP, k, true);
-    Points p = centroids;
-    // make sure that initial centroids are unique
-    auto fun = [&](int index) {
-        int ii = centroids.size();
-        for (int i = index; i < (centroids.size() - 1); i++) {
-            //todo: compare new generated from beginning if such
-            for (int j = i + 1; j < centroids.size(); j++) {
-                if (centroids[i].x == centroids[j].x)
-                    if (centroids[i].y == centroids[j].y)
-                        return i;
-            }
-        }
-        return -1;
-    };
-
-    int index = fun(0);
-
-    while (index >= 0) {
-        index = fun(index);
-        centroids[index].x = getRandom(1, 100);
-        centroids[index].y = getRandom(1, 100);
-    }
-
-    return centroids;
 }
 
 /****************************
@@ -192,7 +128,7 @@ void cluster(int k, MEASURE measure) {
     }
     int i = 0;
     //plot points before clustering
-    plot(points, centroids, measure, i );
+    plot(points, centroids, measure, k, i );
 
     do {
         updateLabels(measure);
@@ -200,7 +136,7 @@ void cluster(int k, MEASURE measure) {
     } while (updateCentroids());
 
     //plot the final clustering
-    plot(points, centroids, measure, i );
+    plot(points, centroids, measure, k, i );
 
     intracluster(measure,k);
     minMax(points,centroids,measure);

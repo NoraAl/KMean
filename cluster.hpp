@@ -47,15 +47,13 @@ Points  generateRandom(Points &points, double minX, double maxX, int num, bool c
 
 Points  generateRandom(Points &points, double minX, double maxX, int num, bool centroids, double minY, double maxY);
 
-Points initialCenters(int k);
+Points initialCenters(Points centroids, double minP, double maxP, int k);
 
 void cluster(int k, MEASURE measure = Euclidean);
 
 void plot(Points points, Mat image);
 
-void show(Mat image, MEASURE m, int i);
-
-void plot(Points& points, Points& centroids, MEASURE measure, int i);
+void plot(Points& points, Points& centroids, MEASURE measure, int k, int i);
 
 void printPoints(Points points) ;
 

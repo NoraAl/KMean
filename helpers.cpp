@@ -125,17 +125,17 @@ void plot(Points points, Mat image) {
     //opencv coordinates are not mathematical coordinates, we need to flip the image
     for (auto p:points) {
         if (p.cluster < 0)//centroids
-            circle(image, Point((p.x * 40) + p2, (p.y * 40) + p2), 3, colors[colors.size() - 1], -1);
+            circle(image, Point((p.x * 4) + p2, (p.y * 4) + p2), 3, colors[colors.size() - 1], -1);
         else
-            circle(image, Point((p.x * 40) + p2, (p.y * 40) + p2), 2, colors[p.cluster], -1);
+            circle(image, Point((p.x * 4) + p2, (p.y * 4) + p2), 2, colors[p.cluster], -1);
     }
 }
 
-void show(Mat image, MEASURE m, int i) {
+void show(Mat image, MEASURE m,int k, int i) {
     Mat flipped;
     flip(image, flipped, 0);
     string filename = m ? "../results/Manhattan_" : "../results/Euclidean_";
-    filename += to_string(i) + ".png";
+    filename += to_string(k)+"_"+to_string(i) + ".png";
     imwrite(filename, flipped);
 }
 
@@ -148,11 +148,11 @@ void printPoints(Points points) {
     cout << endl;
 }
 
-void plot(Points &points, Points &centroids, MEASURE m, int i) {
+void plot(Points &points, Points &centroids, MEASURE m, int k, int i) {
     Mat image = Mat::zeros(420, 420, CV_8UC3);
     plot(points, image);
     plot(centroids, image);
-    show(image, m, i);
+    show(image, m,k, i);
 }
 
 Points readPoints(string filename, bool centroids, char separator) {
