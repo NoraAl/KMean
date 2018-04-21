@@ -1,3 +1,4 @@
+#include <fstream>
 #include "cluster.hpp"
 
 // overload operators
@@ -142,9 +143,7 @@ void printPoints(Points points) {
     int i = 0;
     for (auto p: points) {
         i++;
-        if (i % 10 == 0)
-            cout << endl;
-        cout << BCYAN << "(" << p.x << "," << p.y << ")\t" << RESET;
+        cout  << "" << p.x << "," << p.y << "\n" ;
     }
     cout << endl;
 }
@@ -154,4 +153,37 @@ void plot(Points &points, Points &centroids, MEASURE m, int i) {
     plot(points, image);
     plot(centroids, image);
     show(image, m, i);
+}
+
+Points readPoints(string filename, bool centroids, char separator) {
+    Points points;
+    P point;
+    point.cluster =(centroids? -1:0);;
+    ifstream file(filename, ifstream::in);
+    if (!file) {
+        throw "Not a valid file name.";
+    }
+
+    if (file.is_open())
+    {
+        string line, x, y ;
+        while (getline(file, line)) {
+            stringstream lineStream(line);
+            getline(lineStream, x, separator);
+            getline(lineStream, y);
+
+            if(!x.empty() && !y.empty()) {
+                point.x = atof(x.c_str());
+                point.y = atof(y.c_str());
+
+                points.push_back(point);
+            }
+        }
+        file.close();
+    } else {
+        throw "couldn't open " + filename + "\n";
+    }
+
+    return points;
+
 }

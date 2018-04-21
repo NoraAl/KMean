@@ -41,6 +41,8 @@ bool operator==(const P &p1, const P &p2);
 
 bool operator!=(const P &p1, const P &p2);
 
+Points readPoints(string filename, bool centroids, char separator = ',');
+
 Points  generateRandom(Points &points, double minX, double maxX, int num, bool centroids = false);
 
 Points  generateRandom(Points &points, double minX, double maxX, int num, bool centroids, double minY, double maxY);
@@ -68,5 +70,6 @@ void intracluster(MEASURE m, int k);
 void minMax(Points &points, Points &centroids, MEASURE m);
 
 string fnum(double num);
+
 
 #endif

@@ -2,7 +2,6 @@
 
 static Points points;
 static Points centroids;
-static int minP, maxP;
 
 /****************************
  *
@@ -14,22 +13,11 @@ static int minP, maxP;
 
 int main() {
     try {
-        minP = 1;
-        maxP = 100;
-        int count = 100;
 
         srand(time(nullptr));
-
-        //auto ps = generateRandom(points, minP, maxP, count);
-        Points ps = {{1,1},{1.5,1.5},{1,2},{1,3},{1,4},
-                     {2,1},{4,4},{2,2},{2,3},{2,4}};
-
-
-        Points c = {{1,1,-1},{1,2,-1}, {4,4,-1}};
-
-        cout <<"Points:"<<endl;
-        printPoints(ps);
-
+        //auto ps = generateRandom(points, minP, maxP, 1000);
+        auto ps = readPoints("../points.txt", false);
+        
         vector<int> ks={2};
         //cluster for each k
         for (auto k: ks){
