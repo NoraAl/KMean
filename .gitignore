@@ -2,4 +2,6 @@
 build/*
 /.idea
 /.vscode
+results/*
+.DS_Store
 !.keep

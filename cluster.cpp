@@ -16,23 +16,32 @@ int main() {
 
         srand(time(nullptr));
 
-        vector <int> pCount = {20,1000};
+        vector <int> pCount = {20};//,1000};
         vector <int> kCount = {2,3,4,7};
-
-
-        //cluster for each k
-        for (auto k: kCount){
-            string pointfile = format("../points_%d.txt",pCount[0]);
-            string centroidfile = format("../k_%d.txt", k);
-
-            cout <<"\n\nk = "<<k<<endl;
-
+        auto process = [](string centroidfile, string pointfile, int k, MEASURE m){
             centroids = readPoints(centroidfile,true);
             points = readPoints(pointfile,false);
-            cluster(k, Euclidean);
-            centroids = readPoints(centroidfile,true);
-            points = readPoints(pointfile,false);
-            cluster(k,Manhattan);
+            cluster(k,m);
+        };
+
+        for (auto i: pCount){// for variant number of points
+            for (auto k: kCount){ // for variant k
+
+                string pointfile = format("../points_%d.txt",i);
+                string centroidfile = format("../k_%d.txt", k);
+
+                cout <<BCYAN<<"********\nk = "<<k<<"\n********"<<RESET;
+
+                process(centroidfile,pointfile,k,Euclidean);
+                process(centroidfile,pointfile,k,Manhattan);
+
+//                centroids = readPoints(centroidfile,true);
+//                points = readPoints(pointfile,false);
+//                cluster(k, Euclidean);
+//                centroids = readPoints(centroidfile,true);
+//                points = readPoints(pointfile,false);
+//                cluster(k,Manhattan);
+            }
         }
         return 0;
     } catch (string error) {
@@ -174,7 +183,7 @@ void intracluster(MEASURE m, int k) {
     }
 
 
-    cout <<endl<<"Intra-distances ("<<(m? "Manhattan":"Euclidean")<<"):"<<endl;
+    cout <<endl<<"Intra-distances ("<<BCYAN<<(m? "Manhattan":"Euclidean")<<RESET<<"):"<<endl;
     double sum = 0;
     for(auto d: distances){
         if (d<0)
